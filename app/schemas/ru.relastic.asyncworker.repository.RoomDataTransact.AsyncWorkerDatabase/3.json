@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "8ce24a6e4c071c4ea8e11b9e4c28d6ca",
+    "identityHash": "1203ea98acdd6d099784fdff3432f9e1",
     "entities": [
       {
         "tableName": "clients",
@@ -184,7 +184,7 @@
       },
       {
         "tableName": "calls",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`code` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_client` INTEGER NOT NULL, `phone` TEXT, `dateCalling` TEXT, `note` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`code` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `code_client` INTEGER NOT NULL, `phone` TEXT, `dateCalling` TEXT, `note` TEXT)",
         "fields": [
           {
             "fieldPath": "code",
@@ -193,8 +193,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "id_client",
-            "columnName": "id_client",
+            "fieldPath": "code_client",
+            "columnName": "code_client",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -238,7 +238,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"8ce24a6e4c071c4ea8e11b9e4c28d6ca\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"1203ea98acdd6d099784fdff3432f9e1\")"
     ]
   }
 }

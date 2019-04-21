@@ -19,7 +19,7 @@ import ru.relastic.asyncworker.repository.TransactData.ResponseData.*;
 
 public class RoomDataTransact extends AsyncTask<AuthData,Integer,TransactData>implements DataTransact {
     public static final String DB_NAME = "database.db";
-    public static final int VERSION_DB = 3;
+    public static final int VERSION_DB = 5;
 
     private final AsyncWorkerDatabase mAsyncWorkerDatabase;
     private IDataTransactCallback mCallback;
@@ -74,7 +74,7 @@ public class RoomDataTransact extends AsyncTask<AuthData,Integer,TransactData>im
             case 201: //по id клиента
                 clients = mClientsDAO.getClientsById(authData[0].getArg());
                 schedule = mScheduleDAO.getScheduleByIdClient(authData[0].getArg());
-                calls = mIncomingCallDAO.getCallsByIdClient(authData[0].getArg());
+                calls = mIncomingCallDAO.getCallsByCodeClient(authData[0].getArg());
                 data = new ResponseData(clients,schedule,calls);
                 break;
             case 202: //с момента последней синхронизации из pref
@@ -84,9 +84,17 @@ public class RoomDataTransact extends AsyncTask<AuthData,Integer,TransactData>im
                 break;
             case 203: //по номеру телефона
                 clients = mClientsDAO.getClientsByPhone(authData[0].getExtras());
-                data = new ResponseData(clients,schedule,calls);
+                data = new ResponseData(clients,null,null);
                 break;
             case 204: //вычисляем дату здесь не нужно
+                break;
+            case 205: //Звонившие клиенты
+                clients = mClientsDAO.getClientsNotified();
+                data = new ResponseData(clients,null,null);
+                break;
+            case 206: //Неизвестные звонки
+                calls = mIncomingCallDAO.getCallsUnknown();
+                data = new ResponseData(null,null,calls);
                 break;
             case 300:
                 if (authData[0].getBody() != null) {
@@ -127,6 +135,28 @@ public class RoomDataTransact extends AsyncTask<AuthData,Integer,TransactData>im
                     }
                 }
                 break;
+            case 400: //обработка неизвестного звонка
+                if (authData[0].getBody() != null) {
+                    if (authData[0].getBody().getCalls() != null) {
+                        mIncomingCallDAO.mergeDataByPhoneUnknown(authData[0]
+                                .getBody()
+                                .getCalls()
+                                .get(0));
+                    }
+                }
+                break;
+            case 401: //обработка звонка клиента
+                if (authData[0].getBody() != null) {
+                    if (authData[0].getBody().getCalls() != null) {
+                        mIncomingCallDAO.mergeDataWithNotifyClientByCode(authData[0]
+                                .getBody()
+                                .getCalls()
+                                .get(0));
+                    }
+                }
+                break;
+            default:
+                System.out.println("UNKNOWN DATA EVENT: "+authData[0].getType());
         }
         ResponseMsg msg = new TransactData.ResponseMsg();
         msg.setCode(0);
@@ -163,6 +193,9 @@ public class RoomDataTransact extends AsyncTask<AuthData,Integer,TransactData>im
 
         @Query("select * from clients where updated = 1")
         public abstract List<Client> getClientsUpdated();
+
+        @Query("select * from clients where notified = 1")
+        public abstract List<Client> getClientsNotified();
 
         @Update
         public abstract int updateData(List<Client> data);
@@ -209,20 +242,22 @@ public class RoomDataTransact extends AsyncTask<AuthData,Integer,TransactData>im
         @Query("select * from calls")
         public abstract List<IncomingCall> getCalls();
 
-        @Query("select * from calls where id_client = :id")
-        public abstract List<IncomingCall> getCallsByIdClient(int id);
+        @Query("select * from calls where code_client = :code_client")
+        public abstract List<IncomingCall> getCallsByCodeClient(int code_client);
 
-        @Query("select * from calls where id_client = :id")
-        public abstract IncomingCall getCallByIdClient(int id);
+        @Query("select * from calls where code_client = 0")
+        public abstract List<IncomingCall> getCallsUnknown();
 
-        @Query("delete from calls where id_client = :id")
-        public abstract void deleteById(int id);
+        @Query("select * from calls where code_client = :code_client")
+        public abstract IncomingCall getCallByCodeClient(int code_client);
 
-        @Query("delete from calls where phone = :phone and id_client = 0")
+
+        @Query("delete from calls where code = :code")
+        public abstract void deleteByCode(int code);
+        @Query("delete from calls where phone = :phone and code_client = 0")
         public abstract void deleteByPhoneUnknown(String phone);
-
-        @Query("update clients set notified = 1 where id = :id")
-        public abstract void updateNotifyToClientById(int id);
+        @Query("update clients set notified = 1 where code = :code")
+        public abstract void updateNotifyToClientByCode(int code);
 
         @Update
         public abstract void updateData(List<IncomingCall> data);
@@ -240,15 +275,15 @@ public class RoomDataTransact extends AsyncTask<AuthData,Integer,TransactData>im
         public abstract void deleteDataItem(IncomingCall data);
 
         @Transaction
-        public void mergeDataByPhoneItem(IncomingCall new_call) {
+        public void mergeDataByPhoneUnknown(IncomingCall new_call) {
             deleteByPhoneUnknown(new_call.getPhone());
             insertDataItem(new_call);
         }
         @Transaction
-        public void mergeDataWithNotyfy(IncomingCall new_call) {
-            deleteById(new_call.getId_client());
+        public void mergeDataWithNotifyClientByCode(IncomingCall new_call) {
+            deleteByPhoneUnknown(new_call.getPhone());
             insertDataItem(new_call);
-            updateNotifyToClientById(new_call.getId_client());
+            updateNotifyToClientByCode(new_call.getClient().getCode());
         }
 
     }

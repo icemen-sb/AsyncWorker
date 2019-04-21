@@ -13,7 +13,8 @@ import ru.relastic.asyncworker.repository.TransactData.ResponseData.*;
 
 
 public class ZViewHolderIncomingCalls extends ZViewHolder {
-    public static int EVENT_BUTTON_SELECT_PERSONE = 1;
+    public static int EVENT_BUTTON_ADD_PERSONE = 1;
+    public static int EVENT_BUTTON_REMOVE_ITEM = 2;
     private TextView mTextViewNumeric;
     private TextView mTextViewPhone;
     private TextView mTextViewDate;
@@ -40,7 +41,7 @@ public class ZViewHolderIncomingCalls extends ZViewHolder {
         mCallback = callback;
         mTextViewNumeric.setText(String.valueOf(position+1));
         mTextViewPhone.setText(NoNull(call.getPhone()));
-        mTextViewDate.setText(call.getDateCalling());
+        mTextViewDate.setText(call.getDateCallingFormat());
         mButtonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

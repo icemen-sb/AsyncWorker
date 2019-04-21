@@ -8,36 +8,90 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 public class AuthData {
+    public static int AUTH_TYPE_HELO            = 0;        //Запрос данных сервера
+    public static int AUTH_TYPE_RESQUE          = 1;        //Запрос смены пароля
+    public static int AUTH_TYPE_COMMIT          = 2;        //Подтверждение смены пароля
+    public static int AUTH_TYPE_GET_SESSION_ID  = 3;        //Запрос одноразового открытого ключа:
+                                                            //если в запросе присутствует логин,
+                                                            //одноразовый открытый ключ всегда
+                                                            //добавляется в ответ сервера,
+                                                            //а старый ключ аннулируется
     public static int AUTH_TYPE_GETALL          = 200;
     public static int AUTH_TYPE_GET_BY_ID       = 201;      //arg='id'
     public static int AUTH_TYPE_GET_SYNC        = 202;      //extras='текущий last sync'
     public static int AUTH_TYPE_GET_BY_PHONE    = 203;      //extras='входящий номер телефона (только цифры)
     public static int AUTH_TYPE_GET_UPDATE_TS   = 204;      //extras ответа будет содержать актуальную дату обновления бд сервера
+    public static int AUTH_TYPE_GETALL_NITUFIED = 205;      //Запрос клиентов с уведомлением
+    public static int AUTH_TYPE_GETALL_NEWES    = 206;      //Запрос неидентифиципрванных звонков
     public static int AUTH_TYPE_INSERT          = 300;      //новые записи
     public static int AUTH_TYPE_UPDATE          = 301;      //измененные записи
     public static int AUTH_TYPE_DELETE          = 302;      //удаляемые записи
     public static int AUTH_TYPE_TR_UNKNOWN      = 400;      //обработка неизвестного звонка
-    public static int AUTH_TYPE_TR_NOTIFI       = 401;      //обработка звонка клиента
+    public static int AUTH_TYPE_TR_NOTIFY       = 401;      //обработка звонка клиента
     //public static int AUTH_TYPE_PUT_BY_ID       = 300;
 
-    private boolean mIsReady= false;
-    private int type = 0;
-    private String login;
-    private String secret_key;
-    private String session_id;
-    private String token;
-    private int arg = -1;
-    private String extras = null;
-    private TransactData.ResponseData body = null;
+    private boolean is_ready= false;        //No auto Init
+    private String login = null;            //No auto Init
+    private String secret_key;              //No auto Init
 
-    public AuthData(){}
+    private int type;                       //Auto Init
+    private int arg;                        //Auto Init
+    private String extras;                  //Auto Init
+    private TransactData.ResponseData body; //Auto Init
+
+    private volatile String session_id;     //No Scope
+    private volatile String token;          //No Scope
+
+
+    public AuthData(){init();}
+    private void init () {
+        type = 0;
+        arg = -1;
+        extras = null;
+        body = null;
+    }
     private AuthData(String login, String key) {
+        init();
         this.login = login;
         this.secret_key = key;
-        this.session_id = genNewKey();                      //генерируем значение 5 знаков
-        String token_clean = this.secret_key + "-" + this.session_id;
-        this.token = getToken(token_clean);                 //вычисляем значение
-        this.mIsReady = true;
+        this.is_ready = true;
+        //this.session_id = genNewKey();                      //генерируем значение 5 знаков
+        //String token_clean = this.secret_key + "-" + this.session_id;
+        //this.token = getToken(token_clean);                 //вычисляем значение
+    }
+    public void updateREG(Bundle bundle) {
+        init();
+        if (bundle != null) {
+            init();
+            this.login = bundle.getString(PreferencesTransact.PREF_NAME_LOGIN);
+            this.secret_key = bundle.getString(PreferencesTransact.PREF_NAME_SECRET_KEY);
+        }
+    }
+    public void updateREG(String login, String key) {
+        init();
+        this.login = login;
+        this.secret_key = key;
+    }
+    public AuthData next() {
+        AuthData retVal = new AuthData(this.login, this.secret_key);
+        retVal.session_id = this.session_id;
+        retVal.token = this.token;
+        this.session_id = null;
+        this.token = null;
+        return retVal;
+    }
+    public AuthData clone() {
+        AuthData retVal = new AuthData();
+        retVal.is_ready = this.is_ready;
+        retVal.login = this.login;
+        retVal.secret_key = this.secret_key;
+        retVal.type = this.type;
+        retVal.arg = this.arg;
+        retVal.extras = this.extras;
+        retVal.body = this.body;
+        retVal.session_id = this.session_id;
+        retVal.token = this.token;
+        return retVal;
     }
 
 
@@ -52,9 +106,13 @@ public class AuthData {
     public String getLogin() {
         return login;
     }
-    public String getSecret_key(){return secret_key;}
     public String getSession_id() {
         return session_id;
+    }
+    public void setSession_id(String session_id) {
+        this.session_id = session_id;
+        String token_clean = this.secret_key + "-" + this.session_id;
+        this.token = genToken(token_clean);                 //вычисляем значение
     }
     public String getToken() {
         return token;
@@ -84,8 +142,13 @@ public class AuthData {
         return this;
     }
 
+    public boolean isReady() {
+        return (this.is_ready);
+    }
 
-    private static String getToken(String s) {
+
+
+    private static String genToken(String s) {
         String $token = "";
         try {
             MessageDigest m = null;
@@ -101,30 +164,6 @@ public class AuthData {
         Random r = new Random();
         return String.valueOf(r.nextInt(89999999)+10000000);
     }
-
-    public void update(Bundle bundle) {
-        if (bundle != null) {
-            this.login = bundle.getString(PreferencesTransact.PREF_NAME_LOGIN);
-            this.secret_key = bundle.getString(PreferencesTransact.PREF_NAME_SECRET_KEY);
-        }
-    }
-    public void update(String login, String key) {
-        this.login = login;
-        this.secret_key = key;
-    }
-    public AuthData next() {
-        this.session_id = genNewKey();                      //генерируем значение 5 знаков
-        String token_clean = this.secret_key + "-" + this.session_id;
-        this.token = getToken(token_clean);                 //вычисляем значение
-        System.out.println("##########: "+login);
-        System.out.println("##########: "+secret_key);
-        return this;
-    }
-
-    public boolean isReady() {
-        return (this.mIsReady);
-    }
-
     public static AuthData newInstance(String login, String secret_key) {
         return new AuthData(login, secret_key);
     }

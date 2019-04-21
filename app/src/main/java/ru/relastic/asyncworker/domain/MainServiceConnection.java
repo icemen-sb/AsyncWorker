@@ -15,7 +15,6 @@ public class MainServiceConnection implements ServiceConnection{
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        System.out.println("****** mBinder == null: "+ (service == null));
         //messenger = new Messenger(service);
         callback.onStateChange(true, ((MainService.LocalBinder) service).getService(), this);
     }

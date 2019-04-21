@@ -20,9 +20,12 @@ public interface IPreserterStarter {
     public static final int WHAT_INSERT_NEWCALLS_ITEM       = 23;
     public static final int EVENT_WHAT_UICALLBACK           = 30;
     public static final int EVENT_WHAT_VIEW_REDIRECT        = 31;
+    public static final int EVENT_WHAT_OTHER                = 32;
 
     public void startUI(IncomingCall incomingCall);
     public void populateData (@NonNull ZAdapter zAdapter, int what, Object arg);
     public void updateDataItem (@Nullable ZAdapter zAdapter, int what, Object arg);
     public void insertDataItem (@Nullable ZAdapter zAdapter, int what, Object arg);
+    public void addListener (IPreserterUICallback iPreserterUICallback);
+    public void removeListener (IPreserterUICallback iPreserterUICallback);
 }

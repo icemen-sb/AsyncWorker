@@ -9,9 +9,11 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class TransactData {
     private ResponseMsg response_msg;
@@ -43,14 +45,21 @@ public class TransactData {
         private int arg;
         private String timestamp;
         private String extras;
+        private String session_id;
 
         public ResponseMsg () {}
-        public ResponseMsg (int code, String message, int arg, String timestamp, String extras) {
+        public ResponseMsg (int code,
+                            String message,
+                            int arg,
+                            String timestamp,
+                            String extras,
+                            String session_id) {
             this.code = code;
             this.message = message;
             this.arg = arg;
             this.timestamp = timestamp;
             this.extras = extras;
+            this.session_id = session_id;
         }
 
         public int getCode() {
@@ -86,6 +95,13 @@ public class TransactData {
         }
         public void setExtras(String extras) {
             this.extras = extras;
+        }
+
+        public String getSession_id() {
+            return session_id;
+        }
+        public void setSession_id(String session_id) {
+            this.session_id = session_id;
         }
     }
 
@@ -155,7 +171,7 @@ public class TransactData {
             @Expose
             @PrimaryKey(autoGenerate = true)
             private int code;
-
+            //
             private int id;
             private int id_company;
             private int id_parent;
@@ -167,10 +183,17 @@ public class TransactData {
             private String date_of_birth;
             private String documents;
             private String description;
+            //
             @Expose
             private boolean updated;
             @Expose
             private boolean notified;
+            @Expose
+            private String date_calling;
+            ////
+            @Expose
+            @Ignore
+            public int position;
 
             public Client() {
                 id_company = 0;
@@ -192,6 +215,8 @@ public class TransactData {
                 description = bundle.getString("description");
                 updated = bundle.getBoolean("updated");
                 notified = bundle.getBoolean("notified");
+                date_calling = bundle.getString("date_calling");
+                position = bundle.getInt("position");
             }
 
             public int getCode() {
@@ -292,6 +317,20 @@ public class TransactData {
                 this.notified = notified;
             }
 
+            public String getDate_calling() {
+                return date_calling;
+            }
+            public void setDate_calling(String date_calling) {
+                this.date_calling = date_calling;
+            }
+
+            public int getPosition() {
+                return position;
+            }
+            public void setPosition(int position) {
+                this.position = position;
+            }
+
             public static Bundle toBundle(Client client){
                 Bundle bundle = new Bundle();
 
@@ -311,26 +350,39 @@ public class TransactData {
 
                 bundle.putBoolean("updated",client.getUpdated());
                 bundle.putBoolean("notified",client.getNotified());
+                bundle.putString("date_calling",client.getDate_calling());
+
+                bundle.putInt("position",client.getPosition());
+
                 return bundle;
             }
             public static Client fromBundle(Bundle data){
                 return new Client(data);
             }
+
         }
 
         @Entity(tableName = "schedule", indices = {@Index("code")})
         public static class ScheduleItem {
+            @Expose
             @PrimaryKey(autoGenerate = true)
             private int code;
-
+            @Expose
+            private int code_client = 0;
+            //
             private int id;
             private int id_company;
             private int id_client;
             private String last_change;
             private String scheduled;
             private String note;
+            //
             @Expose
             private boolean updated;
+            ////
+            @Expose
+            @Ignore
+            public int position;
 
             public ScheduleItem() {}
 
@@ -341,8 +393,15 @@ public class TransactData {
                 this.code = code;
             }
 
+            public int getCode_client() {
+                return code_client;
+            }
+            public void setCode_client(int code_client) {
+                this.code_client = code_client;
+            }
+
             public int getId() {
-                return id;
+                return this.id;
             }
             public void setId(int id) {
                 this.id = id;
@@ -390,34 +449,46 @@ public class TransactData {
                 this.note = note;
             }
 
+            public int getPosition() {
+                return position;
+            }
+            public void setPosition(int position) {
+                this.position = position;
+            }
         }
 
         @Entity(tableName = "calls", indices = {@Index("code")})
         public static class IncomingCall {
-            public static final String INCOMING_CALL_ID_CLIENT = "incoming_call_id_client";
+            public static final String INCOMING_CALL_CODE_CLIENT = "incoming_call_code_client";
             public static final String INCOMING_CALL_PHONE = "incoming_call_phone";
             public static final String INCOMING_CALL_DATE_CALLING = "incoming_call_date_calling";
             public static final String INCOMING_CALL_NOTE = "incoming_call_note";
+            static final String FORMAT_DEFAULT_DATE = "dd/MM/yyyy";
+            static final String FORMAT_DEFAULT_TIME = "HH:mm:ss";
+            static final String DEFAULT_TIME_MIDDAY = "12:00:00";
+            static final String FORMAT_DEFAULT_DATETIME = FORMAT_DEFAULT_DATE +" "+FORMAT_DEFAULT_TIME;
 
             @PrimaryKey(autoGenerate = true)
             private int code;
-            private int id_client = 0;
+            private int code_client = 0;
             private String phone;
             private String dateCalling;
             private String note;
             @Ignore
             private Client client = null;
+            @Ignore
+            private int position;
 
             public IncomingCall() {}
             @Ignore
             public IncomingCall(String phone) {
-                this.id_client = 0;
+                this.code_client = 0;
                 this.phone = phone;
                 this.dateCalling = String.valueOf((new Date()).getTime());
             }
             @Ignore
             public IncomingCall(Client client) {
-                id_client = client.getId();
+                code_client = client.getCode();
                 phone = client.getPhone();
                 dateCalling = String.valueOf((new Date()).getTime());
                 this.client = client;
@@ -425,17 +496,18 @@ public class TransactData {
             @Ignore
             public IncomingCall(Bundle bundle) {
                 if (bundle != null) {
-                    if (bundle.getString(INCOMING_CALL_ID_CLIENT) != null) {
-                        id_client = Integer.valueOf(bundle.getString(INCOMING_CALL_ID_CLIENT));
+                    if (bundle.getString(INCOMING_CALL_CODE_CLIENT) != null) {
+                        code_client = Integer.valueOf(bundle.getString(INCOMING_CALL_CODE_CLIENT));
                     }
                     phone = bundle.getString(INCOMING_CALL_PHONE);
                     dateCalling = bundle.getString(INCOMING_CALL_DATE_CALLING);
                     note = bundle.getString(INCOMING_CALL_NOTE);
                 }
             }
+
             public Bundle getBundle() {
                 Bundle bundle = new Bundle();
-                bundle.putString(INCOMING_CALL_ID_CLIENT, String.valueOf(id_client));
+                bundle.putString(INCOMING_CALL_CODE_CLIENT, String.valueOf(code_client));
                 bundle.putString(INCOMING_CALL_PHONE, phone);
                 bundle.putString(INCOMING_CALL_DATE_CALLING,dateCalling);
                 bundle.putString(INCOMING_CALL_NOTE,note);
@@ -449,11 +521,11 @@ public class TransactData {
                 this.code = code;
             }
 
-            public int getId_client() {
-                return id_client;
+            public int getCode_client() {
+                return code_client;
             }
-            public void setId_client(int id_client) {
-                this.id_client = id_client;
+            public void setCode_client(int code_client) {
+                this.code_client = code_client;
             }
 
             public String getPhone() {
@@ -466,6 +538,10 @@ public class TransactData {
             public String getDateCalling() {
                 return dateCalling;
             }
+            public String getDateCallingFormat() {
+                return IncomingCall.getDateTimeString(IncomingCall.parseDigitInt(dateCalling), null);
+            }
+
             public void setDateCalling(String dataCalling) {
                 this.dateCalling = dataCalling;
             }
@@ -483,7 +559,46 @@ public class TransactData {
             public void setClient(Client client) {
                 this.client = client;
             }
-        }
 
+            public int getPosition() {
+                return position;
+            }
+            public void setPosition(int position) {
+                this.position = position;
+            }
+
+            public static Client createClientByPhone(String phone){
+                Client retVal = new Client();
+                retVal.setPhone(phone);
+                return retVal;
+            }
+            public static String getDateString(long date, @Nullable String date_format){
+                if (date_format==null) {date_format = FORMAT_DEFAULT_DATE;}
+                SimpleDateFormat sdf = new SimpleDateFormat(date_format);
+                sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+                return sdf.format(new Date(date));
+            }
+            public static String getTimeString(long date, @Nullable String time_format){
+                if (time_format==null) {time_format = FORMAT_DEFAULT_TIME;}
+                SimpleDateFormat sdf = new SimpleDateFormat(time_format);
+                sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+                return sdf.format(new Date(date));
+            }
+            public static String getDateTimeString(long date, @Nullable String datetime_format){
+                if (datetime_format==null) {datetime_format = FORMAT_DEFAULT_DATETIME;}
+                SimpleDateFormat sdf = new SimpleDateFormat(datetime_format);
+                sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+                return sdf.format(new Date(date));
+            }
+            public static final long parseDigitInt(String pattern) {
+                String retval="";
+                for (char c : pattern.toCharArray()) {
+                    if (Character.isDigit(c)) {
+                        retval+=c;
+                    }
+                }
+                return Long.parseLong(retval);
+            }
+        }
     }
 }

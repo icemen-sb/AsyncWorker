@@ -25,9 +25,7 @@ public class MyReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         App.getComponent().inject(this);
-        System.out.println("//обрабатываем тел. звонок");//обрабатываем тел. звонок
         if ((intent.getAction()!=null) && intent.getAction().equals("android.intent.action.PHONE_STATE")) {
-            System.out.println("//обрабатываем тел. звонок");//обрабатываем тел. звонок
             myHandleReceiver.enqueu(INTENT_WHAT_INCOMING_CALL, intent.getExtras());
         } else if (intent.hasExtra(INTENT_WHAT) && intent.getStringExtra(INTENT_WHAT).equals(INTENT_WHAT_VALIE)) {
             //запускаем UI

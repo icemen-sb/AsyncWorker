@@ -1,6 +1,8 @@
 package ru.relastic.asyncworker.presenter;
 
+import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import ru.relastic.asyncworker.repository.TransactData.ResponseData.Client;
 
 public class ZViewHolderClients extends ZViewHolder {
     public static int EVENT_BUTTON_SELECT_PERSONE = 1;
+    private View mLayout;
     private TextView mTextViewNumeric;
     private TextView mTextViewFIO;
     private TextView mTextViewNote;
@@ -23,6 +26,7 @@ public class ZViewHolderClients extends ZViewHolder {
 
     public ZViewHolderClients(@NonNull View itemView) {
         super(itemView);
+        mLayout = (View) itemView.findViewById(R.id.rv_person_layout);
         mTextViewNumeric = (TextView) itemView.findViewById(R.id.rv_person_textview1);
         mTextViewFIO = (TextView) itemView.findViewById(R.id.rv_person_textview2);
         mTextViewNote = (TextView) itemView.findViewById(R.id.rv_person_textview3);
@@ -33,12 +37,18 @@ public class ZViewHolderClients extends ZViewHolder {
     @Override
     public void setData(int position, final Object item, final IPreserterUICallback callback) {
         Client client = (Client)item;
+        if (client.getNotified()) {
+            mLayout.setBackgroundColor(mLayout.getResources().getColor(R.color.primary_light));
+        }else {
+            mLayout.setBackgroundColor(mLayout.getResources().getColor(R.color.icons));
+        }
+
         mPosition = position;
         mClient = (Client)item;
         mCallback = callback;
         mTextViewNumeric.setText(String.valueOf(position+1));
         mTextViewFIO.setText(NoNull(client.getLastname()) + " " + NoNull(client.getFirstname()) +" " + NoNull(client.getSurename()));
-        mTextViewNote.setText(Boolean.toString(client.getNotified()));
+        mTextViewNote.setText(NoNull(client.getDescription()));
         mButtonNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -34,13 +34,13 @@ public class AppModule {
             @Override
             public void responseData(Object value) {
                 System.out.println("-------------- СОЗДАНИЕ ЭКЗЕМПЛЯРА AuthData");
-                AppModule.this.mAuthData.update((Bundle) value);
+                AppModule.this.mAuthData.updateREG((Bundle) value);
             }
 
             @Override
             public void onChange(int What, Object value) {
                 if (What == PreferencesTransact.PREF_REQUEST_SETAUTHKEY) {
-                    mAuthData.update(mAuthData.getLogin(), (String)value);
+                    mAuthData.updateREG(mAuthData.getLogin(), (String)value);
                 }
             }
         };

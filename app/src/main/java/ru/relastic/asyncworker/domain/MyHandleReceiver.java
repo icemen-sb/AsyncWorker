@@ -25,7 +25,8 @@ import ru.relastic.asyncworker.dagger2.App;
 import ru.relastic.asyncworker.repository.AuthData;
 import ru.relastic.asyncworker.repository.IDataTransactCallback;
 import ru.relastic.asyncworker.repository.TransactData;
-import ru.relastic.asyncworker.repository.TransactData.ResponseData.IncomingCall;
+import ru.relastic.asyncworker.repository.TransactData.*;
+import ru.relastic.asyncworker.repository.TransactData.ResponseData.*;
 public class MyHandleReceiver implements Runnable {
 
     private int mWhat;
@@ -86,24 +87,24 @@ public class MyHandleReceiver implements Runnable {
                                     service.requestData(auth, new IDataTransactCallback() {
                                                 @Override
                                                 public void onResponseData(TransactData response) {
-                                                    TransactData.ResponseData.IncomingCall incomingCall = new TransactData.ResponseData.IncomingCall();
-
+                                                    TransactData.ResponseData.IncomingCall incomingCall;// = null;// = new TransactData.ResponseData.IncomingCall();
+                                                    int type;
                                                     if((response.getResponse_msg().getCode()==0) && (response.getResponse_data().getClients().size()>0)) {
-                                                        TransactData.ResponseData.Client client = response.getResponse_data().getClients().get(0);
+                                                        Client client = response.getResponse_data().getClients().get(0);
                                                         System.out.println("********* Клиент НАЙДЕН: "+client.getLastname());
-                                                        incomingCall = new TransactData.ResponseData.IncomingCall(client);
+                                                        incomingCall = new IncomingCall(client);
                                                         //отображаем уведомление и окно
-                                                        auth.setType(AuthData.AUTH_TYPE_TR_NOTIFI);
+                                                        type = AuthData.AUTH_TYPE_TR_NOTIFY;
                                                         showNotify(incomingCall);
                                                         showWindow(incomingCall);
                                                     } else {
-                                                        auth.setType(AuthData.AUTH_TYPE_TR_UNKNOWN);
+                                                        type = AuthData.AUTH_TYPE_TR_UNKNOWN;
                                                         System.out.println("********* Клинт не найден: "+phoneNumber);
-                                                        incomingCall = new TransactData.ResponseData.IncomingCall(phoneNumber);
+                                                        incomingCall = new IncomingCall(phoneNumber);
                                                     }
                                                     //добавляем в локальную базу
-                                                    service.requestData(auth.setBody(
-                                                            new TransactData.ResponseData(incomingCall)),
+                                                    service.requestData(auth.next().setType(type).setBody(
+                                                            new ResponseData(incomingCall)),
                                                             new IDataTransactCallback() {
                                                                 @Override
                                                                 public void onResponseData(TransactData response) {
@@ -147,7 +148,7 @@ public class MyHandleReceiver implements Runnable {
     }
 
     private void showNotify(IncomingCall incomingCall) {
-        if (incomingCall.getId_client() != 0) {
+        if (incomingCall.getCode_client() != 0) {
             Intent intent = MyReceiver.getIntent(mContext);
             intent.putExtra(MyReceiver.INTENT_WHAT,MyReceiver.INTENT_WHAT_VALIE);
             intent.putExtra(MyReceiver.INTENT_CLIENT_BUNDLE,incomingCall.getBundle());
@@ -252,7 +253,6 @@ public class MyHandleReceiver implements Runnable {
         }
     }
     public static final String parseDigit(String pattern) {
-        // <editor-fold defaultstate="collapsed" desc="parseLong">
         String retval="";
         for (char c : pattern.toCharArray()) {
             if (Character.isDigit(c)) {
@@ -260,5 +260,5 @@ public class MyHandleReceiver implements Runnable {
             }
         }
         return retval;
-    }//</editor-fold>
+    }
 }

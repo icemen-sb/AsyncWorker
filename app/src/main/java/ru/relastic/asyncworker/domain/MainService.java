@@ -18,6 +18,7 @@ import ru.relastic.asyncworker.repository.DataTransact;
 import ru.relastic.asyncworker.repository.IDataTransactCallback;
 import ru.relastic.asyncworker.repository.IPreferencesTransactCallback;
 import ru.relastic.asyncworker.repository.PreferencesTransact;
+import ru.relastic.asyncworker.repository.TransactData;
 import ru.relastic.asyncworker.repository.TransactData.ResponseData.IncomingCall;
 
 public class MainService extends Service {
@@ -95,8 +96,55 @@ public class MainService extends Service {
             //!!!
             //toLocal = false;
             //!!!
-            DataTransact dataTransact = toLocal ? dataTransactLocal : dataTransactRemote;
-            dataTransact.requestData(data,callback);
+            //System.out.println("КЛИЕНТ КОД: "+data.getBody().getCalls().size());
+            final DataTransact dataTransact = toLocal ? dataTransactLocal : dataTransactRemote;
+
+            //if (toLocal && (data.getBody() != null)) {
+            if (!toLocal && data.getSession_id()==null && data.getType()!=0) {
+                //Запрашиваем HELO и осущ. рекурсию
+                final AuthData data_res = data;
+                final IDataTransactCallback callback_res = callback;
+                dataTransact.requestData(new AuthData(),
+                        new IDataTransactCallback() {
+                            @Override
+                            public void onResponseData(TransactData response) {
+                                if (response.getResponse_msg().getSession_id().length()>0) {
+                                    data_res.setSession_id(response.getResponse_msg().getSession_id());
+                                    dataTransact.requestData(data_res,callback_res);
+                                }else {
+                                    response.getResponse_msg().setCode(1);
+                                    response.getResponse_msg().setMessage("Ошибка авторизации");
+                                    callback_res.onResponseData(new TransactData(
+                                            response.getResponse_msg(),
+                                            null));
+                                }
+                            }
+                });
+            }else {
+                if (toLocal && data.getType()>=300) {
+
+                    final IDataTransactCallback callback_post_intercept = callback;
+                    final TransactData.ResponseData data_for_intercept = data.getBody();
+
+                    callback = new IDataTransactCallback() {
+                        @Override
+                        public void onResponseData(TransactData response) {
+                            if (response.getResponse_msg().getCode() == 0) {
+                                for (IServiceConnectCallback uiCallback : mListeners) {
+                                    uiCallback.onChangeTask(
+                                            IServiceConnectCallback.WHAT_SERVICE_EVENT_UDDATED_DATA,
+                                            data_for_intercept);
+                                }
+                            }
+                            if (callback_post_intercept != null) {
+                                callback_post_intercept.onResponseData(response);
+                            }
+
+                        }
+                    };
+                }
+                dataTransact.requestData(data,callback);
+            }
         }
 
         @Override
@@ -128,7 +176,6 @@ public class MainService extends Service {
             myPresenterStarter.startUI(incomingCall);
 
         }
-
         @Override
         public void addListener(IServiceConnectCallback callback) {
             mListeners.add(callback);
