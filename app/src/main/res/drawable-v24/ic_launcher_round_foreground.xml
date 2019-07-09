@@ -10,8 +10,8 @@
         android:name="scalePort"
         android:pivotX="360"
         android:pivotY="360"
-        android:scaleX="1.05"
-        android:scaleY="1.05">
+        android:scaleX="0.7"
+        android:scaleY="0.7">
         <group
             android:name="translatePort"
             android:translateX="58"
@@ -20,4 +20,3 @@
         </group>
     </group>
 </vector>
-

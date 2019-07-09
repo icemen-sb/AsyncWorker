@@ -1,3 +1,37 @@
 <resources>
-    <string name="app_name">AsyncWorker</string>
+    <string name="app_name">Cloud Reception</string>
+    <string name="dialing">Позвонить</string>
+    <string name="mark_as_read">Отметить как прочитанное</string>
+    <string name="edit_current">Перейти к редактированию</string>
+    <string name="editing_current">Подробно о клиенте</string>
+    <string name="delete_current">Удалить выбранное напоминание</string>
+    <string name="create_new_client">Создать нового клиента</string>
+    <string name="creating_client">Новый клиент</string>
+    <string name="mark_all_as_read">Отметить все как прочитанное</string>
+    <string name="clear_list_notifies">Очистить список напоминаний</string>
+    <string name="confirm_title_update">Обновление данных</string>
+    <string name="confirm_title_delete">Удаление данных</string>
+    <string name="confirm_mark_all_read">Вы действительно хотите пометить все уведомления прочитанными?</string>
+    <string name="confirm_clear_all_unknown">Вы действительно хотите удалить информацию о неизвестных вызовах?"</string>
+    <string name="requires_grant_permission">Приложению необходимо разрешение на отображение
+        информации во время входящего вызова</string>
+    <string name="requires_call_permission">Приложению необходимо разрешение на осуществление исходящего вызова</string>
+    <string name="annotation_settings">Настройки</string>
+    <string name="annotation_create_person">Новый клиент</string>
+    <string name="annotation_to_schedule">Расписание</string>
+    <string name="annotation_all_clients">Все клиенты</string>
+    <string name="annotation_notified_clients">Уведомления</string>
+    <string name="annotation_unknown_calls">Пропущенные</string>
+    <string name="annotation_back">Назад</string>
+    <string name="annotation_commit">Сохранить</string>
+    <string name="skip">Пропустить</string>
+    <string name="grant_permission">Настроить</string>
+    <string name="error">Ошибка</string>
+    <string name="required_fields_has_not_filled">Обязательные поля не заполнены</string>
+    <string name="alert_title">Cloud Reception: звонок клиента…</string>
+    <string name="copyright">Anton E.Gerasimov, 2019</string>
+    <string name="notifications_channel_id">cloud_reception_notifications</string>
+    <string name="notifications_channel_name">Канал уведомлений</string>
+    <string name="notifications_channel_description">Уведомления о пропущенных вызовах
+        зарегестированных клиентов</string>
 </resources>

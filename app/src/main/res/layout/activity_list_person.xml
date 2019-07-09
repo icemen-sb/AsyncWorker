@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/person_list_main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,45 +9,51 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/background"
         android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
+        <ru.relastic.customviewlibrary.meet022customview.ButtonWA
+            android:id="@+id/person_button_top1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:tag="top1"
+            app:annotation_source="@string/annotation_settings"
+            app:back_color="@color/background"
+            app:front_color="@color/primary_light"
+            app:image_source="@drawable/ic_perm_data_setting_black_48dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ru.relastic.customviewlibrary.meet022customview.ButtonWA
             android:id="@+id/person_button_top2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:tag="top2"
-            android:layout_width="@android:dimen/app_icon_size"
-            android:layout_height="@android:dimen/app_icon_size"
-            android:background="@drawable/ic_person_add_outline_black_48dp"
+            app:annotation_source="@string/annotation_create_person"
+            app:back_color="@color/background"
+            app:front_color="@color/colorPrimary"
+            app:image_source="@drawable/ic_person_add_solid_black_48dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/person_button_top1"
-            android:layout_width="@android:dimen/app_icon_size"
-            android:layout_height="@android:dimen/app_icon_size"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/ic_perm_data_setting_black_48dp"
-            android:backgroundTint="@color/primary_light"
-            android:tag="top1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
+        <ru.relastic.customviewlibrary.meet022customview.ButtonWA
             android:id="@+id/person_button_top3"
-            android:layout_width="@android:dimen/notification_large_icon_height"
-            android:layout_height="@android:dimen/app_icon_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:background="@drawable/ic_to_schedule"
-            android:backgroundTint="@color/divider"
             android:tag="top3"
+            app:annotation_source="@string/annotation_to_schedule"
+            app:back_color="@color/background"
+            app:front_color="@color/primary_light"
+            app:image_source="@drawable/ic_to_schedule"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -57,7 +63,10 @@
         android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/constraintLayout11"
+        android:background="@color/divider"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/alignLayout1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,56 +76,48 @@
             android:id="@+id/person_container1"
             android:layout_width="match_parent"
             android:layout_height="@android:dimen/app_icon_size"
-            android:orientation="vertical"/>
+            android:orientation="vertical" />
     </ScrollView>
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/constraintLayout11"
+    <ru.relastic.customviewlibrary.meet023customviewgroup.AlignLayout
+        android:id="@+id/alignLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <Button
-            android:id="@+id/person_button_bottom3"
-            android:tag="bottom3"
-            android:layout_width="@android:dimen/app_icon_size"
-            android:layout_height="@android:dimen/app_icon_size"
-            android:layout_marginStart="16dp"
-            android:background="@drawable/ic_unknown_2"
-
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/person_button_bottom2"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
+        <ru.relastic.customviewlibrary.meet022customview.ButtonWA
             android:id="@+id/person_button_bottom1"
-            android:layout_width="@android:dimen/app_icon_size"
-            android:layout_height="@android:dimen/app_icon_size"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/ic_people_black_48dp"
-            android:backgroundTint="@color/divider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:tag="bottom1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/person_button_bottom2"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:annotation_source="@string/annotation_all_clients"
+            app:back_color="@color/background"
+            app:front_color="@color/colorPrimary"
+            app:image_source="@drawable/ic_people_black_48dp" />
 
-        <Button
+        <ru.relastic.customviewlibrary.meet022customview.ButtonWA
             android:id="@+id/person_button_bottom2"
-            android:layout_width="@android:dimen/app_icon_size"
-            android:layout_height="@android:dimen/app_icon_size"
-            android:background="@drawable/ic_notifies_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:tag="bottom2"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.523"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:annotation_source="@string/annotation_notified_clients"
+            app:back_color="@color/background"
+            app:front_color="@color/colorPrimary"
+            app:image_source="@drawable/ic_notifies" />
 
-    </android.support.constraint.ConstraintLayout>
+        <ru.relastic.customviewlibrary.meet022customview.ButtonWA
+            android:id="@+id/person_button_bottom3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="bottom3"
+            app:annotation_source="@string/annotation_unknown_calls"
+            app:back_color="@color/background"
+            app:front_color="@color/colorPrimary"
+            app:image_source="@drawable/ic_unknown" />
+    </ru.relastic.customviewlibrary.meet023customviewgroup.AlignLayout>
 
 </android.support.constraint.ConstraintLayout>
